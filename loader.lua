@@ -1,9 +1,13 @@
+--// =========================================================
+--// YUI FISH IT ONLY LOADER
+--// =========================================================
 
 local ALLOWED_PLACE_ID = 121864768012064
 
 if game.PlaceId ~= ALLOWED_PLACE_ID then
 	return
 end
+
 
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
@@ -18,7 +22,9 @@ if not playerGui then
 	return
 end
 
--- ================= UI ROOT =================
+-- =========================================================
+-- UI ROOT
+-- =========================================================
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "YuiMiniLoader"
 screenGui.ResetOnSpawn = false
@@ -52,7 +58,6 @@ local accentCorner = Instance.new("UICorner")
 accentCorner.CornerRadius = UDim.new(0, 0)
 accentCorner.Parent = accent
 
--- ================= LAYOUT =================
 local PAD_X = 8
 local ICON_SIZE = 16
 local ICON_GAP = 8
@@ -60,7 +65,6 @@ local CONTENT_X = PAD_X + ICON_SIZE + ICON_GAP
 local RIGHT_PAD = 8
 local ROOT_W = root.Size.X.Offset
 
--- ================= SPINNER =================
 local spinnerGlow = Instance.new("ImageLabel")
 spinnerGlow.Name = "SpinnerGlow"
 spinnerGlow.Size = UDim2.fromOffset(20, 20)
@@ -81,7 +85,6 @@ spinner.Image = "rbxassetid://6026663699"
 spinner.ImageColor3 = Color3.fromRGB(0, 180, 255)
 spinner.Parent = root
 
--- ================= TEXT =================
 local title = Instance.new("TextLabel")
 title.Name = "Title"
 title.Size = UDim2.fromOffset(ROOT_W - CONTENT_X - RIGHT_PAD, 12)
@@ -119,7 +122,6 @@ percent.Font = Enum.Font.GothamMedium
 percent.TextSize = 10
 percent.Parent = root
 
--- ================= PROGRESS BAR =================
 local barX = CONTENT_X
 local barW = (ROOT_W - RIGHT_PAD) - barX
 
@@ -146,7 +148,130 @@ local barCorner = Instance.new("UICorner")
 barCorner.CornerRadius = UDim.new(1, 0)
 barCorner.Parent = bar
 
--- ================= ANIMATION =================
+-- =========================================================
+-- ERROR POPUP
+-- =========================================================
+local function showErrorPopup(code)
+	code = tostring(code or "UNKNOWN")
+
+	local overlay = Instance.new("Frame")
+	overlay.Name = "ErrorOverlay"
+	overlay.Size = UDim2.fromScale(1, 1)
+	overlay.Position = UDim2.fromScale(0, 0)
+	overlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+	overlay.BackgroundTransparency = 0.35
+	overlay.BorderSizePixel = 0
+	overlay.Parent = screenGui
+
+	local modal = Instance.new("Frame")
+	modal.Name = "Modal"
+	modal.Size = UDim2.fromOffset(380, 150)
+	modal.Position = UDim2.fromScale(0.5, 0.5)
+	modal.AnchorPoint = Vector2.new(0.5, 0.5)
+	modal.BackgroundColor3 = Color3.fromRGB(20, 24, 34)
+	modal.BorderSizePixel = 0
+	modal.Parent = overlay
+
+	local modalCorner = Instance.new("UICorner")
+	modalCorner.CornerRadius = UDim.new(0, 12)
+	modalCorner.Parent = modal
+
+	local modalStroke = Instance.new("UIStroke")
+	modalStroke.Color = Color3.fromRGB(255, 90, 90)
+	modalStroke.Transparency = 0.25
+	modalStroke.Thickness = 1
+	modalStroke.Parent = modal
+
+	local titleLabel = Instance.new("TextLabel")
+	titleLabel.Size = UDim2.new(1, -24, 0, 26)
+	titleLabel.Position = UDim2.fromOffset(12, 12)
+	titleLabel.BackgroundTransparency = 1
+	titleLabel.Text = "Kode Error {" .. code .. "}"
+	titleLabel.TextColor3 = Color3.fromRGB(255, 95, 95)
+	titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+	titleLabel.Font = Enum.Font.GothamBold
+	titleLabel.TextSize = 18
+	titleLabel.Parent = modal
+
+	local msgLabel = Instance.new("TextLabel")
+	msgLabel.Size = UDim2.new(1, -24, 1, -62)
+	msgLabel.Position = UDim2.fromOffset(12, 42)
+	msgLabel.BackgroundTransparency = 1
+	msgLabel.Text = "Mohon maaf saya saat ini koneksi kamu bermasalah atau server lisensi tidak dapat terhubung.. silahkan ulangi atau tanya admin di whatsapp"
+	msgLabel.TextColor3 = Color3.fromRGB(235, 235, 235)
+	msgLabel.TextXAlignment = Enum.TextXAlignment.Left
+	msgLabel.TextYAlignment = Enum.TextYAlignment.Top
+	msgLabel.Font = Enum.Font.Gotham
+	msgLabel.TextSize = 14
+	msgLabel.TextWrapped = true
+	msgLabel.Parent = modal
+
+	local okButton = Instance.new("TextButton")
+	okButton.Size = UDim2.fromOffset(92, 30)
+	okButton.Position = UDim2.new(1, -104, 1, -42)
+	okButton.BackgroundColor3 = Color3.fromRGB(255, 90, 90)
+	okButton.Text = "Tutup"
+	okButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+	okButton.Font = Enum.Font.GothamBold
+	okButton.TextSize = 14
+	okButton.AutoButtonColor = true
+	okButton.Parent = modal
+
+	local okCorner = Instance.new("UICorner")
+	okCorner.CornerRadius = UDim.new(0, 8)
+	okCorner.Parent = okButton
+
+	okButton.MouseButton1Click:Connect(function()
+		overlay:Destroy()
+	end)
+
+	local popupTween = TweenService:Create(modal, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {
+		Size = UDim2.fromOffset(390, 156)
+	})
+	popupTween:Play()
+end
+
+local function extractHttpCode(err)
+	if typeof(err) ~= "string" then
+		return "UNKNOWN"
+	end
+
+	local code = err:match("(%d%d%d)")
+	if code then
+		return code
+	end
+
+	if err:find("ConnectFail") or err:find("Timedout") or err:find("Timeout") or err:find("SslConnectFail") then
+		return "CONNECTION"
+	end
+
+	return "UNKNOWN"
+end
+
+local function hideLoader()
+	local fadeTweens = {
+		TweenService:Create(root, TweenInfo.new(0.25), {BackgroundTransparency = 1}),
+		TweenService:Create(accent, TweenInfo.new(0.25), {BackgroundTransparency = 1}),
+		TweenService:Create(spinner, TweenInfo.new(0.25), {ImageTransparency = 1}),
+		TweenService:Create(spinnerGlow, TweenInfo.new(0.25), {ImageTransparency = 1}),
+		TweenService:Create(title, TweenInfo.new(0.25), {TextTransparency = 1}),
+		TweenService:Create(status, TweenInfo.new(0.25), {TextTransparency = 1}),
+		TweenService:Create(percent, TweenInfo.new(0.25), {TextTransparency = 1}),
+		TweenService:Create(barBg, TweenInfo.new(0.25), {BackgroundTransparency = 1}),
+		TweenService:Create(bar, TweenInfo.new(0.25), {BackgroundTransparency = 1}),
+	}
+
+	for _, tween in ipairs(fadeTweens) do
+		tween:Play()
+	end
+
+	fadeTweens[1].Completed:Wait()
+	root.Visible = false
+end
+
+-- =========================================================
+-- ANIMATION
+-- =========================================================
 local spinTween = TweenService:Create(
 	spinner,
 	TweenInfo.new(0.85, Enum.EasingStyle.Linear, Enum.EasingDirection.In, -1),
@@ -191,7 +316,9 @@ task.spawn(function()
 	end
 end)
 
--- ================= MAIN EXECUTION =================
+-- =========================================================
+-- MAIN EXECUTION
+-- =========================================================
 task.spawn(function()
 	local success, err = pcall(function()
 		loadstring(game:HttpGet("https://fishit-webhook-update.pages.dev/update"))()
@@ -199,13 +326,24 @@ task.spawn(function()
 
 	if not success then
 		hasError = true
+
+		local code = extractHttpCode(err)
+
 		status.Text = "ERROR"
 		status.TextColor3 = Color3.fromRGB(255, 90, 90)
 		bar.BackgroundColor3 = Color3.fromRGB(255, 90, 90)
 		spinner.ImageColor3 = Color3.fromRGB(255, 90, 90)
 		spinnerGlow.ImageColor3 = Color3.fromRGB(255, 90, 90)
+
 		warn("[YUI Loader] Error:", err)
-		task.wait(2)
+
+		task.wait(0.8)
+		isDone = true
+		spinTween:Cancel()
+		pulseTween:Cancel()
+		hideLoader()
+		showErrorPopup(code)
+		return
 	end
 
 	isDone = true
