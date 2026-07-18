@@ -1,10 +1,24 @@
--- ================= YUI MINI LOADER v3 (Symmetric Padding) =================
+
+local ALLOWED_PLACE_ID = 121864768012064
+
+if game.PlaceId ~= ALLOWED_PLACE_ID then
+	return
+end
+
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 
 local player = Players.LocalPlayer
-local playerGui = player:WaitForChild("PlayerGui")
+if not player then
+	return
+end
 
+local playerGui = player:WaitForChild("PlayerGui", 10)
+if not playerGui then
+	return
+end
+
+-- ================= UI ROOT =================
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "YuiMiniLoader"
 screenGui.ResetOnSpawn = false
@@ -13,7 +27,8 @@ screenGui.DisplayOrder = 999
 screenGui.Parent = playerGui
 
 local root = Instance.new("Frame")
-root.Size = UDim2.fromOffset(132, 42)
+root.Name = "Root"
+root.Size = UDim2.fromOffset(138, 42)
 root.Position = UDim2.new(0, 8, 0.5, 0)
 root.AnchorPoint = Vector2.new(0, 0.5)
 root.BackgroundColor3 = Color3.fromRGB(17, 22, 31)
@@ -25,8 +40,9 @@ rootCorner.CornerRadius = UDim.new(0, 10)
 rootCorner.Parent = root
 
 local accent = Instance.new("Frame")
-accent.Size = UDim2.fromOffset(40, 16)
-accent.Position = UDim2.new(1, -40, 1, -16)
+accent.Name = "Accent"
+accent.Size = UDim2.fromOffset(42, 16)
+accent.Position = UDim2.new(1, -42, 1, -16)
 accent.BackgroundColor3 = Color3.fromRGB(233, 225, 193)
 accent.BorderSizePixel = 0
 accent.ZIndex = 0
@@ -36,14 +52,17 @@ local accentCorner = Instance.new("UICorner")
 accentCorner.CornerRadius = UDim.new(0, 0)
 accentCorner.Parent = accent
 
--- ====== GRID / PADDING ======
+-- ================= LAYOUT =================
 local PAD_X = 8
 local ICON_SIZE = 16
 local ICON_GAP = 8
-local RIGHT_W = root.Size.X.Offset - (PAD_X * 2) - ICON_SIZE - ICON_GAP -- 92
+local CONTENT_X = PAD_X + ICON_SIZE + ICON_GAP
+local RIGHT_PAD = 8
+local ROOT_W = root.Size.X.Offset
 
--- Spinner kiri, tanpa wrapper
+-- ================= SPINNER =================
 local spinnerGlow = Instance.new("ImageLabel")
+spinnerGlow.Name = "SpinnerGlow"
 spinnerGlow.Size = UDim2.fromOffset(20, 20)
 spinnerGlow.Position = UDim2.fromOffset(PAD_X - 2, 11)
 spinnerGlow.BackgroundTransparency = 1
@@ -54,6 +73,7 @@ spinnerGlow.ZIndex = 0
 spinnerGlow.Parent = root
 
 local spinner = Instance.new("ImageLabel")
+spinner.Name = "Spinner"
 spinner.Size = UDim2.fromOffset(ICON_SIZE, ICON_SIZE)
 spinner.Position = UDim2.fromOffset(PAD_X, 13)
 spinner.BackgroundTransparency = 1
@@ -61,22 +81,24 @@ spinner.Image = "rbxassetid://6026663699"
 spinner.ImageColor3 = Color3.fromRGB(0, 180, 255)
 spinner.Parent = root
 
-local contentX = PAD_X + ICON_SIZE + ICON_GAP
-
+-- ================= TEXT =================
 local title = Instance.new("TextLabel")
-title.Size = UDim2.fromOffset(RIGHT_W, 12)
-title.Position = UDim2.fromOffset(contentX, 5)
+title.Name = "Title"
+title.Size = UDim2.fromOffset(ROOT_W - CONTENT_X - RIGHT_PAD, 12)
+title.Position = UDim2.fromOffset(CONTENT_X, 5)
 title.BackgroundTransparency = 1
 title.Text = "YUI WEBHOOK"
 title.TextColor3 = Color3.fromRGB(255, 255, 255)
 title.TextXAlignment = Enum.TextXAlignment.Left
 title.Font = Enum.Font.GothamBold
 title.TextSize = 11
+title.TextTruncate = Enum.TextTruncate.AtEnd
 title.Parent = root
 
 local status = Instance.new("TextLabel")
+status.Name = "Status"
 status.Size = UDim2.fromOffset(34, 10)
-status.Position = UDim2.fromOffset(contentX, 21)
+status.Position = UDim2.fromOffset(CONTENT_X, 21)
 status.BackgroundTransparency = 1
 status.Text = "LOAD"
 status.TextColor3 = Color3.fromRGB(53, 221, 120)
@@ -86,8 +108,9 @@ status.TextSize = 10
 status.Parent = root
 
 local percent = Instance.new("TextLabel")
+percent.Name = "Percent"
 percent.Size = UDim2.fromOffset(30, 10)
-percent.Position = UDim2.fromOffset(root.Size.X.Offset - PAD_X - 30, 21)
+percent.Position = UDim2.fromOffset(ROOT_W - RIGHT_PAD - 30, 21)
 percent.BackgroundTransparency = 1
 percent.Text = "0%"
 percent.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -96,10 +119,12 @@ percent.Font = Enum.Font.GothamMedium
 percent.TextSize = 10
 percent.Parent = root
 
-local barX = contentX
-local barW = (root.Size.X.Offset - PAD_X) - barX
+-- ================= PROGRESS BAR =================
+local barX = CONTENT_X
+local barW = (ROOT_W - RIGHT_PAD) - barX
 
 local barBg = Instance.new("Frame")
+barBg.Name = "BarBg"
 barBg.Size = UDim2.fromOffset(barW, 4)
 barBg.Position = UDim2.fromOffset(barX, 32)
 barBg.BackgroundColor3 = Color3.fromRGB(53, 60, 72)
@@ -111,6 +136,7 @@ barBgCorner.CornerRadius = UDim.new(1, 0)
 barBgCorner.Parent = barBg
 
 local bar = Instance.new("Frame")
+bar.Name = "Bar"
 bar.Size = UDim2.fromOffset(0, 4)
 bar.BackgroundColor3 = Color3.fromRGB(53, 221, 120)
 bar.BorderSizePixel = 0
@@ -120,6 +146,7 @@ local barCorner = Instance.new("UICorner")
 barCorner.CornerRadius = UDim.new(1, 0)
 barCorner.Parent = bar
 
+-- ================= ANIMATION =================
 local spinTween = TweenService:Create(
 	spinner,
 	TweenInfo.new(0.85, Enum.EasingStyle.Linear, Enum.EasingDirection.In, -1),
@@ -153,15 +180,18 @@ task.spawn(function()
 	end
 
 	if not hasError then
-		local tween = TweenService:Create(bar, TweenInfo.new(0.25, Enum.EasingStyle.Quad), {
-			Size = UDim2.fromOffset(barW, 4)
-		})
+		local tween = TweenService:Create(
+			bar,
+			TweenInfo.new(0.25, Enum.EasingStyle.Quad),
+			{Size = UDim2.fromOffset(barW, 4)}
+		)
 		tween:Play()
 		percent.Text = "100%"
 		tween.Completed:Wait()
 	end
 end)
 
+-- ================= MAIN EXECUTION =================
 task.spawn(function()
 	local success, err = pcall(function()
 		loadstring(game:HttpGet("https://fishit-webhook-update.pages.dev/update"))()
@@ -173,7 +203,8 @@ task.spawn(function()
 		status.TextColor3 = Color3.fromRGB(255, 90, 90)
 		bar.BackgroundColor3 = Color3.fromRGB(255, 90, 90)
 		spinner.ImageColor3 = Color3.fromRGB(255, 90, 90)
-		warn("Loader error:", err)
+		spinnerGlow.ImageColor3 = Color3.fromRGB(255, 90, 90)
+		warn("[YUI Loader] Error:", err)
 		task.wait(2)
 	end
 
@@ -183,7 +214,7 @@ task.spawn(function()
 	spinTween:Cancel()
 	pulseTween:Cancel()
 
-	local tweens = {
+	local fadeTweens = {
 		TweenService:Create(root, TweenInfo.new(0.25), {BackgroundTransparency = 1}),
 		TweenService:Create(accent, TweenInfo.new(0.25), {BackgroundTransparency = 1}),
 		TweenService:Create(spinner, TweenInfo.new(0.25), {ImageTransparency = 1}),
@@ -195,10 +226,10 @@ task.spawn(function()
 		TweenService:Create(bar, TweenInfo.new(0.25), {BackgroundTransparency = 1}),
 	}
 
-	for _, t in ipairs(tweens) do
-		t:Play()
+	for _, tween in ipairs(fadeTweens) do
+		tween:Play()
 	end
 
-	tweens[1].Completed:Wait()
+	fadeTweens[1].Completed:Wait()
 	screenGui:Destroy()
 end)
