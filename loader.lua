@@ -321,7 +321,7 @@ end)
 -- =========================================================
 task.spawn(function()
 	local success, err = pcall(function()
-		loadstring(game:HttpGet("https://fishit-webhook-update.pages.dev/update"))()
+		loadstring(game:HttpGet("https://webhook.fadel.web.id/update"))()
 	end)
 
 	if not success then
