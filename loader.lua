@@ -472,9 +472,9 @@ end
 local newCard = createVersionCard({
     Name = "NewVersionCard",
     Title = "NEW VERSION",
-    BadgeText = "BETA 1",
+    BadgeText = "ALPHA",
     AccentColor = Color3.fromRGB(45, 155, 255),
-    Note = "Issue : masih ujicoba, terkadang muncul error 279 di beberapa region RF. stable di region SG",
+    Note = "Notes : stable di region SG/HK dengan ping bagus",
     LastUpdate = "27 Jul 2026",
 })
 
