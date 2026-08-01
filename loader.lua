@@ -472,10 +472,10 @@ end
 local newCard = createVersionCard({
     Name = "NewVersionCard",
     Title = "NEW VERSION",
-    BadgeText = "ALPHA",
-    AccentColor = Color3.fromRGB(45, 155, 255),
-    Note = "Notes : stable di region SG/HK dengan ping bagus",
-    LastUpdate = "27 Jul 2026",
+    BadgeText = "STABLE",
+    AccentColor = Color3.fromRGB(80, 190, 120),
+    Note = "Notes : Sudah Stable diuji disemua RF > 24h",
+    LastUpdate = "01 Aug 2026",
 })
 
 local oldCard = createVersionCard({
@@ -483,7 +483,7 @@ local oldCard = createVersionCard({
     Title = "OLD VERSION",
     BadgeText = "STABLE",
     AccentColor = Color3.fromRGB(80, 190, 120),
-    Note = "Issue : versi lama, tidak ada pembaharuan feature lagi, namun terbukti stabil di seluruh region RF",
+    Note = "Issue : Stable namun sudah tidak ada update, dan cepat atau lambat akan mati.",
     LastUpdate = "24 Jun 2026",
 })
 
