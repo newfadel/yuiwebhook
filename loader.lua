@@ -534,6 +534,45 @@ local chooserIntroTween = TweenService:Create(
 chooserIntroTween:Play()
 
 -- =========================================================
+-- AUTO-SELECT COUNTDOWN (teks digabung ke chooserDesc)
+-- =========================================================
+local AUTO_SELECT_SECONDS = 6
+local BASE_DESC_TEXT = "Choose which loader version you want to use."
+
+local function setDescCountdown(sec)
+    chooserDesc.Text = BASE_DESC_TEXT .. string.format(" (Auto start NEW in %ds)", sec)
+end
+
+setDescCountdown(AUTO_SELECT_SECONDS)
+
+task.spawn(function()
+    local startTime = tick()
+    local remaining = AUTO_SELECT_SECONDS
+
+    while remaining > 0 do
+        if hasSelected or isClosed then
+            return
+        end
+
+        local elapsed = tick() - startTime
+        remaining = math.max(0, AUTO_SELECT_SECONDS - math.floor(elapsed))
+
+        if chooserDesc and chooserDesc.Parent then
+            setDescCountdown(remaining)
+        end
+
+        task.wait(0.1)
+    end
+
+    if not hasSelected and not isClosed then
+        if chooserDesc and chooserDesc.Parent then
+            chooserDesc.Text = BASE_DESC_TEXT .. " (Auto-selecting NEW version...)"
+        end
+        selectVersion(VERSION_URLS.NEW)
+    end
+end)
+
+-- =========================================================
 -- ERROR POPUP
 -- =========================================================
 local function showErrorPopup(code)
